@@ -1,0 +1,13 @@
+services:
+  scraper:
+    build: .
+    container_name: db_price_scraper
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - TZ=Europe/Berlin
+      - USER_AGENT=my-private-db-price-tracker
+      - DB_PATH=/app/data/price_data.db
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src

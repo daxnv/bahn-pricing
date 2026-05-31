@@ -1,0 +1,9 @@
+{
+  "name": "db-price-scraper",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "db-vendo-client": "latest",
+    "better-sqlite3": "latest"
+  }
+}

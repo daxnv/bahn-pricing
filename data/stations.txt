@@ -1,0 +1,8 @@
+Karlsruhe Hbf: 8000191 (Karlsruhe Hbf)
+Köln Hbf: 8000207 (Köln Hbf)
+München Hbf: 8000261 (München Hbf)
+Berlin Hbf: 8011160 (Berlin Hbf)
+Bonn Hbf: 8000044 (Bonn Hbf)
+Frankfurt(Main)Hbf: 8000105 (Frankfurt(Main)Hbf)
+Hamburg Hbf: 8002549 (Hamburg Hbf)
+Hannover Hbf: 8000152 (Hannover Hbf)
