@@ -8,19 +8,18 @@ const isDebugMode = process.env.DEBUG === 'true';
 const client = createClient(withThrottling(dbnavProfile), 'bahn-price-scraper');
 
 async function sendDiscordError(error, context = '') {
-  try {
-    if (!process.env.DISCORD_WEBHOOK_URL) {
-      throw new Error('DISCORD_WEBHOOK_URL environment variable is required.');
+  if (process.env.DISCORD_WEBHOOK_URL) {
+    try {
+      await fetch(process.env.DISCORD_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `🚨  Error${context ? ' ' : ''}${context}:\n\`\`\`${error.stack.slice(0, 1800)}\`\`\``
+        })
+      });
+    } catch (err) {
+      console.warn('Error sending alert to Discord:', err);
     }
-    await fetch(process.env.DISCORD_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: `🚨  Error${context ? ' ' : ''}${context}:\n\`\`\`${error.stack.slice(0, 1800)}\`\`\``
-      })
-    });
-  } catch (err) {
-    console.warn('Error sending alert to Discord:', err);
   }
 }
 
@@ -29,8 +28,12 @@ async function scrapePrices() {
     const scrapeDate = new Date();
     console.log(`[${scrapeDate.toISOString()}] Starting daily DB price scrape...`);
 
+    if (!process.env.DISCORD_WEBHOOK_URL) {
+      console.warn('Warning: DISCORD_WEBHOOK_URL environment variable is not set. Cannot send error alerts to Discord');
+    }
+
     if (!process.env.DB_PATH) {
-      throw new Error('DB_PATH environment variable is required.');
+      throw new Error('DB_PATH environment variable is required');
     }
     const db = new Database(process.env.DB_PATH);
 
@@ -127,10 +130,11 @@ async function scrapePrices() {
         sendDiscordError(error, `fetching journeys for route ${route.id} on ${firstDeparture}`);
       }
     }
-    console.log(`[${new Date().toISOString()}] Finished scraping successfully.`);
+    console.log(`[${new Date().toISOString()}] Finished scraping successfully`);
   } catch (error) {
     console.error('Error during scraping:', error);
     sendDiscordError(error, 'during scraping');
+    process.exitCode = 1;
   }
 }
 
