@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
+    "better-sqlite3": "latest",
     "db-vendo-client": "latest",
-    "better-sqlite3": "latest"
+    "p-throttle": "^8.1.0"
   }
 }
