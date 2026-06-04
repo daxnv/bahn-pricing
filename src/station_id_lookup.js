@@ -6,6 +6,7 @@ const client = createClient(dbnavProfile, 'station-id-lookup');
 
 const stationNames = [
   'Karlsruhe Hbf',
+  'Köln Hbf',
   'München Hbf',
   'Berlin Hbf',
   'Bonn Hbf',
@@ -61,7 +62,8 @@ async function main() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS stations (
       id TEXT PRIMARY KEY,
-      name TEXT NOT NULL
+      name TEXT NOT NULL,
+      UNIQUE (name)
     )
   `);
 
