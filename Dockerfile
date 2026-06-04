@@ -18,10 +18,6 @@ RUN apt-get purge -y python3 make g++ && apt-get autoremove -y
 COPY src/ ./src/
 COPY crontab /etc/cron.d/scraper-cron
 
-# Populate database
-RUN node src/station_id_lookup.js
-RUN node src/create_journeys.js
-
 # Give execution rights on the cron job and apply it
 RUN chmod 0644 /etc/cron.d/scraper-cron && crontab /etc/cron.d/scraper-cron
 
@@ -29,4 +25,4 @@ RUN chmod 0644 /etc/cron.d/scraper-cron && crontab /etc/cron.d/scraper-cron
 RUN touch /var/log/cron.log
 
 # Run cron in the foreground on container startup
-CMD ["cron", "-f"]
+CMD node src/station_id_lookup.js && node src/create_journeys.js && cron -f
