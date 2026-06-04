@@ -11,7 +11,8 @@ async function main() {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         origin INTEGER NOT NULL,
         destination INTEGER NOT NULL,
-        FOREIGN KEY (origin, destination) REFERENCES stations(id),
+        FOREIGN KEY (origin) REFERENCES stations(id),
+        FOREIGN KEY (destination) REFERENCES stations(id),
         UNIQUE (origin, destination)
     );
 
