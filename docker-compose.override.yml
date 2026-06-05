@@ -1,5 +1,0 @@
-services:
-  scraper:
-    volumes:
-      - ./data:/app/data
-      - ./src:/app/src
