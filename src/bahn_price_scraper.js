@@ -4,8 +4,7 @@ import { withThrottling } from 'db-vendo-client/throttle.js'
 import { profile as dbnavProfile } from 'db-vendo-client/p/dbnav/index.js';
 
 const isDebugMode = process.env.DEBUG === 'true';
-
-const client = createClient(withThrottling(dbnavProfile), 'bahn-price-scraper');
+const client = createClient({...withThrottling(dbnavProfile), randomizeUserAgent: true}, 'dbnav');
 
 async function sendDiscordError(error, context = '') {
   if (process.env.DISCORD_WEBHOOK_URL) {
