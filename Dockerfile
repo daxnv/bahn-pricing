@@ -24,5 +24,8 @@ RUN chmod 0644 /etc/cron.d/scraper-cron && crontab /etc/cron.d/scraper-cron
 # Create the log file to be able to run tail
 RUN touch /var/log/cron.log
 
-# Run cron in the foreground on container startup
-CMD node src/station_id_lookup.js && node src/create_journeys.js && cron -f
+COPY set-cron-env.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/set-cron-env.sh
+
+# Populate database and run cron in the foreground on container startup
+CMD node src/station_id_lookup.js && node src/create_journeys.js; set-cron-env.sh && cron -f

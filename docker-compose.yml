@@ -8,7 +8,6 @@ services:
       - TZ=Europe/Berlin
       - USER_AGENT=db-price-watcher
       - DB_PATH=/app/data/price_data.db
-    env_file:
-      - .env
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
     volumes:
       - ./data:/app/data
