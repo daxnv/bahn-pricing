@@ -62,7 +62,7 @@ async function scrapePrices() {
         UNIQUE (journey, date)
       )
     `);
-    const insertOfferStmt = db.prepare(`INSERT INTO offers (date, journey, price, currency, raw_response) VALUES (?, ?, ?, ?, ?)`);
+    const insertOfferStmt = db.prepare(`INSERT OR IGNORE INTO offers (date, journey, price, currency, raw_response) VALUES (?, ?, ?, ?, ?)`);
 
     const routes = isDebugMode ?
       db.prepare('SELECT * FROM routes WHERE origin = 8000191 AND destination = 8000044').all() : // Karlsruhe Hbf - Bonn Hbf
