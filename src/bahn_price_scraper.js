@@ -116,7 +116,7 @@ async function scrapePrices() {
                   insertOfferStmt.run(scrapeDate.getTime(), journeyId, journey.price ? journey.price.amount : null, journey.price ? journey.price.currency : null, JSON.stringify(journey));
                 } catch (error) {
                   console.warn(`Error inserting offer for journey on route ${route.id} from ${departure} to ${arrival}:`, error);
-                  sendDiscordAlert(error, `inserting offer for journey on route ${route.id} from ${departure} to ${arrival}`);
+                  sendDiscordError(error, `inserting offer for journey on route ${route.id} from ${departure} to ${arrival}`);
                 }
               }
             }
