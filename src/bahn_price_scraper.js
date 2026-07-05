@@ -68,17 +68,18 @@ async function scrapePrices() {
       db.prepare('SELECT * FROM routes WHERE origin = 8000191 AND destination = 8000044').all() : // Karlsruhe Hbf - Bonn Hbf
       db.prepare('SELECT * FROM routes').all();
 
-    const dateIntervals = isDebugMode ?
-      function* () { yield 60; }() : // In debug mode, only fetch prices for in 60 days
-      function* () { // In production mode, fetch prices for the next 105 days
-        for (let i = 0; i < 105; i++) {
-          yield 1;
-        }
-      }();
-
     for (const route of routes) { // For each route in the database
       const firstDeparture = new Date(scrapeDate);
       try {
+        const dateIntervals = isDebugMode ?
+          function* () { yield 60; }() : // In debug mode, only fetch prices for in 60 days
+          function* () { // In production mode, fetch prices for the next 105 days
+            yield 1;
+            for (let i = 0; i < 7; i++) {
+              yield 7;
+            }
+          }();
+
         for (const daysToAdd of dateIntervals) { // Go through all future dates
           firstDeparture.setDate(firstDeparture.getDate() + daysToAdd);
           firstDeparture.setHours(8, 0, 0, 0);
