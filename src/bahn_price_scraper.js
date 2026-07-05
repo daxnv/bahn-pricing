@@ -22,6 +22,10 @@ async function sendDiscordError(error, context = '') {
   }
 }
 
+function date_to_unix_seconds(date) {
+  return Math.floor(date.getTime() / 1000);
+}
+
 async function scrapePrices() {
   try {
     const scrapeDate = new Date();
@@ -98,12 +102,13 @@ async function scrapePrices() {
             );
 
             for (const journey of response.journeys) {
-              const arrivalBeforeLastArrival = new Date(journey.legs[journey.legs.length - 1].plannedArrival) < lastArrival;
+              const plannedDeparture = new Date(journey.legs[0].plannedDeparture);
+              const plannedArrival = new Date(journey.legs[journey.legs.length - 1].plannedArrival);
+
+              const arrivalBeforeLastArrival = plannedArrival < lastArrival;
               keepScrolling = keepScrolling && arrivalBeforeLastArrival; // Note that arrival times need not be in order
 
               if (arrivalBeforeLastArrival) {
-                const departure = journey.legs[0].plannedDeparture;
-                const arrival = journey.legs[journey.legs.length - 1].plannedArrival;
                 journey.legs = journey.legs.filter((leg) => !leg.walking).map((leg) => { // Remove walking legs and station information to save space
                   leg.origin = { id: leg.origin.id };
                   leg.destination = { id: leg.destination.id };
@@ -111,13 +116,13 @@ async function scrapePrices() {
                 });
 
                 try {
-                  insertJourneyStmt.run(route.id, departure, arrival, journey.refreshToken);
-                  const journeyId = selectJourneyStmt.get(route.id, departure, arrival).id;
+                  insertJourneyStmt.run(route.id, date_to_unix_seconds(plannedDeparture), date_to_unix_seconds(plannedArrival), journey.refreshToken);
+                  const journeyId = selectJourneyStmt.get(route.id, date_to_unix_seconds(plannedDeparture), date_to_unix_seconds(plannedArrival)).id;
 
-                  insertOfferStmt.run(scrapeDate.getTime(), journeyId, journey.price ? journey.price.amount : null, journey.price ? journey.price.currency : null, JSON.stringify(journey));
+                  insertOfferStmt.run(date_to_unix_seconds(scrapeDate), journeyId, journey.price ? journey.price.amount : null, journey.price ? journey.price.currency : null, JSON.stringify(journey));
                 } catch (error) {
-                  console.warn(`Error inserting offer for journey on route ${route.id} from ${departure} to ${arrival}:`, error);
-                  sendDiscordError(error, `inserting offer for journey on route ${route.id} from ${departure} to ${arrival}`);
+                  console.warn(`Error inserting offer for journey on route ${route.id} from ${plannedDeparture} to ${plannedArrival}:`, error);
+                  sendDiscordError(error, `inserting offer for journey on route ${route.id} from ${plannedDeparture} to ${plannedArrival}`);
                 }
               }
             }
