@@ -79,8 +79,8 @@ async function scrapePrices() {
           function* () { yield 60; }() : // In debug mode, only fetch prices for in 60 days
           function* () { // In production mode, fetch prices for the next 105 days
             yield 1;
-            for (let i = 0; i < 7; i++) {
-              yield 7;
+            for (let i = 0; i < 23; i++) {
+              yield 3;
             }
           }();
 
