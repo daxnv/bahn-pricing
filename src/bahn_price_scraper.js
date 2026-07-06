@@ -7,10 +7,10 @@ import { profile as dbnavProfile } from 'db-vendo-client/p/dbnav/index.js';
 const isDebugMode = process.env.DEBUG === 'true';
 const throttledProfile = withThrottling(dbnavProfile);
 const resilientProfile = withRetrying(throttledProfile, {
-    retries: 3,
-    minTimeout: 2000
+  retries: 3,
+  minTimeout: 2000
 });
-const client = createClient({...resilientProfile, randomizeUserAgent: true}, 'dbnav');
+const client = createClient({ ...resilientProfile, randomizeUserAgent: true }, 'dbnav');
 
 async function sendDiscordError(error, context = '') {
   if (process.env.DISCORD_WEBHOOK_URL) {
@@ -80,22 +80,22 @@ async function scrapePrices() {
 
     for (const route of routes) { // For each route in the database
       const firstDeparture = new Date(scrapeDate);
-      try {
-        const dateIntervals = isDebugMode ?
-          function* () { yield 60; }() : // In debug mode, only fetch prices for in 60 days
-          function* () { // In production mode, fetch prices for the next 105 days
-            yield 1;
-            for (let i = 0; i < 23; i++) {
-              yield 3;
-            }
-          }();
+      const dateIntervals = isDebugMode ?
+        function* () { yield 60; }() : // In debug mode, only fetch prices for in 60 days
+        function* () { // In production mode, fetch prices for the next 105 days
+          yield 1;
+          for (let i = 0; i < 23; i++) {
+            yield 3;
+          }
+        }();
 
-        for (const daysToAdd of dateIntervals) { // Go through all future dates
-          firstDeparture.setDate(firstDeparture.getDate() + daysToAdd);
-          firstDeparture.setHours(8, 0, 0, 0);
-          const lastArrival = new Date(firstDeparture);
-          lastArrival.setHours(20, 15, 0, 0);
+      for (const daysToAdd of dateIntervals) { // Go through all future dates
+        firstDeparture.setDate(firstDeparture.getDate() + daysToAdd);
+        firstDeparture.setHours(8, 0, 0, 0);
+        const lastArrival = new Date(firstDeparture);
+        lastArrival.setHours(20, 15, 0, 0);
 
+        try {
           for (let laterRef = null, keepScrolling = true; keepScrolling;) {
             const opt = laterRef ?
               { laterThan: laterRef } :
@@ -135,10 +135,10 @@ async function scrapePrices() {
 
             laterRef = response.laterRef; // Set laterRef to request next page
           }
+        } catch (error) {
+          console.warn(`Error fetching journeys for route ${route.id} on ${firstDeparture}:`, error);
+          sendDiscordError(error, `fetching journeys for route ${route.id} on ${firstDeparture}`);
         }
-      } catch (error) {
-        console.warn(`Error fetching journeys for route ${route.id} on ${firstDeparture}:`, error);
-        sendDiscordError(error, `fetching journeys for route ${route.id} on ${firstDeparture}`);
       }
     }
     console.log(`[${new Date().toISOString()}] Finished scraping successfully`);
