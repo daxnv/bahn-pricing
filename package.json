@@ -5,6 +5,7 @@
   "dependencies": {
     "better-sqlite3": "latest",
     "db-vendo-client": "latest",
+    "p-retry": "^8.0.0",
     "p-throttle": "^8.1.0"
   }
 }

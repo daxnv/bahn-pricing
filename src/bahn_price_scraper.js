@@ -1,10 +1,16 @@
 import Database from 'better-sqlite3';
 import { createClient } from 'db-vendo-client';
 import { withThrottling } from 'db-vendo-client/throttle.js'
+import { withRetrying } from 'db-vendo-client/retry.js';
 import { profile as dbnavProfile } from 'db-vendo-client/p/dbnav/index.js';
 
 const isDebugMode = process.env.DEBUG === 'true';
-const client = createClient({...withThrottling(dbnavProfile), randomizeUserAgent: true}, 'dbnav');
+const throttledProfile = withThrottling(dbnavProfile);
+const resilientProfile = withRetrying(throttledProfile, {
+    retries: 3,
+    minTimeout: 2000
+});
+const client = createClient({...resilientProfile, randomizeUserAgent: true}, 'dbnav');
 
 async function sendDiscordError(error, context = '') {
   if (process.env.DISCORD_WEBHOOK_URL) {
