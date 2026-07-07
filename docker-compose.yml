@@ -9,5 +9,6 @@ services:
       - USER_AGENT=dbnav
       - DB_PATH=/app/data/price_data.db
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - DEBUG=${DEBUG}
     volumes:
       - ./data:/app/data

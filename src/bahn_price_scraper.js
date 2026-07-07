@@ -13,7 +13,7 @@ const resilientProfile = withRetrying(throttledProfile, {
 const client = createClient({ ...resilientProfile, randomizeUserAgent: true }, 'dbnav');
 
 async function sendDiscordError(error, context = '') {
-  if (process.env.DISCORD_WEBHOOK_URL) {
+  if (process.env.DISCORD_WEBHOOK_URL && !isDebugMode) {
     try {
       await fetch(process.env.DISCORD_WEBHOOK_URL, {
         method: 'POST',
