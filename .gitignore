@@ -1,3 +1,4 @@
 .env
 docker-compose.override.yml
 data/price_data.db
+plots

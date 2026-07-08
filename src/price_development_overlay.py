@@ -134,7 +134,7 @@ def main():
         fig, ax = plot_price_development(df)
         
         # Save plot
-        output_path = f'./price_development_route{route_id}_{offers_start.date()}_{offers_end.date()}.png'
+        output_path = f'./plots/price_development_route{route_id}_{offers_start.date()}_{offers_end.date()}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         print(f"Plot saved to {output_path}")
         
