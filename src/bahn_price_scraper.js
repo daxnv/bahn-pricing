@@ -8,9 +8,11 @@ const isDebugMode = process.env.DEBUG === 'true';
 const throttledProfile = withThrottling(dbnavProfile);
 const resilientProfile = withRetrying(throttledProfile, {
   retries: 3,
-  minTimeout: 2000
+  minTimeout: 2000,
+  factor: 2
 });
-const client = createClient({ ...resilientProfile, randomizeUserAgent: true }, 'dbnav');
+const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36'
+const client = createClient({ ...resilientProfile, randomizeUserAgent: true }, userAgent);
 
 async function sendDiscordError(error, context = '') {
   if (process.env.DISCORD_WEBHOOK_URL && !isDebugMode) {
@@ -106,6 +108,7 @@ async function scrapePrices() {
               route.destination.toString(),
               opt
             );
+            console.log('success')
 
             for (const journey of response.journeys) {
               const plannedDeparture = new Date(journey.legs[0].plannedDeparture);
