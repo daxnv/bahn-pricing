@@ -112,6 +112,9 @@ async function scrapePrices() {
             for (const journey of response.journeys) {
               const plannedDeparture = new Date(journey.legs[0].plannedDeparture);
               const plannedArrival = new Date(journey.legs[journey.legs.length - 1].plannedArrival);
+              if (plannedArrival == null) {
+                throw new Error("API did not provide departure and arrival times");
+              }
 
               const arrivalBeforeLastArrival = plannedArrival < lastArrival;
               keepScrolling = keepScrolling && arrivalBeforeLastArrival; // Note that arrival times need not be in order
