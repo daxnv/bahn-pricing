@@ -2,17 +2,17 @@ import Database from 'better-sqlite3';
 import { createClient } from 'db-vendo-client';
 import { withThrottling } from 'db-vendo-client/throttle.js'
 import { withRetrying } from 'db-vendo-client/retry.js';
-import { profile as dbnavProfile } from 'db-vendo-client/p/dbnav/index.js';
+import { profile as dbwebProfile } from 'db-vendo-client/p/dbweb/index.js';
 
 const isDebugMode = process.env.DEBUG === 'true';
-const throttledProfile = withThrottling(dbnavProfile);
+const throttledProfile = withThrottling(dbwebProfile, 2, 1000);
 const resilientProfile = withRetrying(throttledProfile, {
   retries: 3,
   minTimeout: 2000,
   factor: 2
 });
 const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36'
-const client = createClient({ ...resilientProfile, randomizeUserAgent: true }, userAgent);
+const client = createClient({ ...resilientProfile, randomizeUserAgent: false }, userAgent);
 
 async function sendDiscordError(error, context = '') {
   if (process.env.DISCORD_WEBHOOK_URL && !isDebugMode) {
@@ -108,7 +108,6 @@ async function scrapePrices() {
               route.destination.toString(),
               opt
             );
-            console.log('success')
 
             for (const journey of response.journeys) {
               const plannedDeparture = new Date(journey.legs[0].plannedDeparture);
