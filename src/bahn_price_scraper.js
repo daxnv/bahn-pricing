@@ -5,14 +5,14 @@ import { withRetrying } from 'db-vendo-client/retry.js';
 import { profile as dbwebProfile } from 'db-vendo-client/p/dbweb/index.js';
 
 const isDebugMode = process.env.DEBUG === 'true';
-const throttledProfile = withThrottling(dbwebProfile, 2, 1000);
-const resilientProfile = withRetrying(throttledProfile, {
+const throttledProfile = withThrottling(dbwebProfile, 1, 1000);
+/*const resilientProfile = withRetrying(throttledProfile, {
   retries: 3,
   minTimeout: 2000,
   factor: 2
-});
+});*/
 const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36'
-const client = createClient({ ...resilientProfile, randomizeUserAgent: false }, userAgent);
+const client = createClient({ ...throttledProfile, randomizeUserAgent: true }, userAgent);
 
 async function sendDiscordError(error, context = '') {
   if (process.env.DISCORD_WEBHOOK_URL && !isDebugMode) {
@@ -77,7 +77,7 @@ async function scrapePrices() {
     const insertOfferStmt = db.prepare(`INSERT OR IGNORE INTO offers (date, journey, price, currency, raw_response) VALUES (?, ?, ?, ?, ?)`);
 
     const routes = isDebugMode ?
-      db.prepare('SELECT * FROM routes WHERE origin = 8000191 AND destination = 8000044').all() : // Karlsruhe Hbf - Bonn Hbf
+      db.prepare('SELECT * FROM routes WHERE id = 1').all() : // Bonn Hbf - Karlsruhe Hbf
       db.prepare('SELECT * FROM routes').all();
 
     for (const route of routes) { // For each route in the database
@@ -102,6 +102,7 @@ async function scrapePrices() {
             const opt = laterRef ?
               { laterThan: laterRef } :
               { departure: firstDeparture }; // departure and laterThan are mutually exclusive, and only set them if not null. Otherwise the API returns an error
+            opt.transfers = 3;
 
             const response = await client.journeys(
               route.origin.toString(),
@@ -110,11 +111,11 @@ async function scrapePrices() {
             );
 
             for (const journey of response.journeys) {
-              const plannedDeparture = new Date(journey.legs[0].plannedDeparture);
-              const plannedArrival = new Date(journey.legs[journey.legs.length - 1].plannedArrival);
-              if (plannedArrival == null) {
+              if (journey.legs[journey.legs.length - 1].plannedArrival == null) {
                 throw new Error("API did not provide departure and arrival times");
               }
+              const plannedDeparture = new Date(journey.legs[0].plannedDeparture);
+              const plannedArrival = new Date(journey.legs[journey.legs.length - 1].plannedArrival);
 
               const arrivalBeforeLastArrival = plannedArrival < lastArrival;
               keepScrolling = keepScrolling && arrivalBeforeLastArrival; // Note that arrival times need not be in order
